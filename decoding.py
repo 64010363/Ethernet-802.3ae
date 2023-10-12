@@ -21,7 +21,7 @@ def XGMII_remove_terminate(block: np.ndarray) -> np.ndarray:
     def is_terminate(blk, start_byte):
         return all(blk[8 * start_byte: 8 * start_byte + 8] == TERM)
 
-    if is_terminate(block, 2):
+    if   is_terminate(block, 2):
         output = block[8:16]
     elif is_terminate(block, 3):
         output = block[8:24]
@@ -42,7 +42,7 @@ def XGMII_remove_terminate(block: np.ndarray) -> np.ndarray:
 
     return output
 
-def unencoder(encoded_data: np.ndarray) -> np.ndarray:
+def decoder(encoded_data: np.ndarray) -> np.ndarray:
     decoded_data = np.array([], dtype=np.int8)
 
     for i in range(0, len(encoded_data), 66):
@@ -55,9 +55,10 @@ def unencoder(encoded_data: np.ndarray) -> np.ndarray:
 
 def main():
     encoded_data = np.array([1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0,
-    0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0])
-    decoded_data = unencoder(encoded_data)
+    0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,])
+    decoded_data = decoder(encoded_data)
     print(decoded_data)
 
 if __name__ == "__main__":
     main()
+

@@ -5,15 +5,17 @@ import encoder
 TERM = 0xfd
 IDLE = 0x07
 
-def unscrambler(block: np.ndarray) -> None:
+def unscrambler(block:np.ndarray) -> np.ndarray:
     seed = np.ones(58, dtype=np.int8)
-
+    output = np.array([], dtype=np.int8)
+    
     for i in range(0, block.size):
         s38 = int(seed[38])
         s57 = int(seed[57])
         res = s38 ^ s57
-        block[i] = res ^ int(block[i])
+        output = np.append(output, res ^ int(block[i]))
         utils.shift_left_bits(seed, block[i])
+    return output
 
 def XGMII_remove_terminate(block: np.ndarray) -> np.ndarray:
     output = np.zeros(64, dtype=np.int8)
@@ -46,7 +48,7 @@ def decoder(encoded_data: np.ndarray) -> np.ndarray:
     decoded_data = np.array([], dtype=np.int8)
 
     for i in range(0, len(encoded_data), 66):
-        block = encoded_data[i:i + 66]
+        block = encoded_data[i:i + 67]
         unscrambler(block)
         block = XGMII_remove_terminate(block)
         decoded_data = np.append(decoded_data, block)
@@ -54,11 +56,20 @@ def decoder(encoded_data: np.ndarray) -> np.ndarray:
     return decoded_data
 
 def main():
-    encoded_data = np.array([1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0,
-    0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,])
+    data = np.array([1, 0, 0, 1, 0, 1, 0, 1])
+    print(data)
+    encoder.scrambler(data)
+    decode = unscrambler(data)
+    print(decode)
+    encoded_data = encoder.encoder(data)
+    print("Encoded Data:")
+    print(encoded_data)
+    
     decoded_data = decoder(encoded_data)
+    print("Decoded Data:")
     print(decoded_data)
-
+    print("Input Data:")
+    print(data)
 if __name__ == "__main__":
     main()
 

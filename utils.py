@@ -19,6 +19,19 @@ def write_byte(block:np.ndarray, val:int, start:int, end:int) -> None:
     for i in reversed(range(start, end+1)):
         block[i] = (val & j != 0)
         j = j << 1
+        
+def read_byte(block:np.ndarray, start:int, end:int) -> int:
+    val = 0
+    digit = 0
+    for i in reversed(range(start, end+1)):
+        val += int(block[i]) << digit
+        digit += 1
+    return val
+
+def create_bits(val:int, size:int) -> np.ndarray:
+    block = np.zeros(size, dtype=np.int8)
+    write_byte(block, val, 0, size-1)
+    return block
 
 def shift_left_bits(seed:np.ndarray, msg_bit:int) -> None:
     num = 0

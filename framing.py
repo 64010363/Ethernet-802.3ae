@@ -16,13 +16,9 @@ def data_length(data:np.ndarray) -> np.ndarray:
 def XGMII_terminate(data:np.ndarray) -> np.ndarray:
     block = np.array(data, dtype=np.int8)
     
-    # Make TERM bits
-    term = np.zeros(8, dtype=np.int8)
-    utils.write_byte(term, utils.TERM, 0, 7)
-    
-    # Make IDLE bits
-    idle = np.zeros(8, dtype=np.int8)
-    utils.write_byte(idle, utils.IDLE, 0, 7)
+    # Make Control bits
+    term = utils.create_bits(utils.TERM, 8)
+    idle = utils.create_bits(utils.IDLE, 8)
     
     # Put Bits here
     block = np.append(block, term)

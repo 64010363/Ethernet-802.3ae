@@ -2,8 +2,6 @@ import numpy as np
 import math
 import utils
 import encoder
-TERM = 0xfd
-IDLE = 0x07
 
 def unscrambler(block:np.ndarray) -> np.ndarray:
     seed = np.ones(58, dtype=np.int8)
@@ -17,59 +15,72 @@ def unscrambler(block:np.ndarray) -> np.ndarray:
         utils.shift_left_bits(seed, block[i])
     return output
 
-def XGMII_remove_terminate(block: np.ndarray) -> np.ndarray:
-    output = np.zeros(64, dtype=np.int8)
-
-    def is_terminate(blk, start_byte):
-        return all(blk[8 * start_byte: 8 * start_byte + 8] == TERM)
-
-    if   is_terminate(block, 2):
-        output = block[8:16]
-    elif is_terminate(block, 3):
-        output = block[8:24]
-    elif is_terminate(block, 4):
-        output = block[8:32]
-    elif is_terminate(block, 5):
-        output = block[8:40]
-    elif is_terminate(block, 6):
-        output = block[8:48]
-    elif is_terminate(block, 7):
-        output = block[8:56]
-    elif is_terminate(block, 8):
-        output = block[8:64]
-    elif is_terminate(block, 9):
-        output = block[8:72]    
-    else:
-        raise ValueError("Invalid XGMII termination")
-
-    return output
+def bit_field_to_XGMII(head:np.ndarray, body: np.ndarray) -> np.ndarray:
+    head_val = utils.read_byte(head, 0, 1)
+    if head_val == 1:
+        return body
+    elif head_val == 0 or head_val == 3:
+        return np.array(body)
+    
+    _term = np.array([1, 1, 1, 1, 1, 1, 0, 1])
+    _idle = [0, 0, 0, 0, 0, 1, 1, 1]
+    val = utils.read_byte(body, 0, 7)
+    match val:
+        case 0x87:
+            return np.append(_term, np.array(_idle * 7))
+        case 0x99:
+            output = np.append(body[8:16], _term)
+            return np.append(output, np.array(_idle * 6))
+        case 0xaa:
+            output = np.append(body[8:24], _term)
+            return np.append(output, np.array(_idle * 5))
+        case 0xb4:
+            output = np.append(body[8:32], _term)
+            return np.append(output, np.array(_idle * 4))
+        case 0xcc:
+            output = np.append(body[8:40], _term)
+            return np.append(output, np.array(_idle * 3))
+        case 0xd2:
+            output = np.append(body[8:48], _term)
+            return np.append(output, np.array(_idle * 2))
+        case 0xe1:
+            output = np.append(body[8:56], _term)
+            return np.append(output, np.array(_idle * 1))
+        case 0xff:
+            return np.append(body[8:64], _term)
+    return np.array(body)
 
 def decoder(encoded_data: np.ndarray) -> np.ndarray:
     decoded_data = np.array([], dtype=np.int8)
 
-    for i in range(0, len(encoded_data), 66):
-        block = encoded_data[i:i + 67]
-        unscrambler(block)
-        block = XGMII_remove_terminate(block)
-        decoded_data = np.append(decoded_data, block)
+    for i in range(0, encoded_data.size, 66):
+        block = encoded_data[i:i + 66]
+        header = block[0:2]
+        body = block[2:66]
+        body = unscrambler(body)
+        code = bit_field_to_XGMII(header, body)
+        decoded_data = np.append(decoded_data, code)
 
     return decoded_data
 
 def main():
-    data = np.array([1, 0, 0, 1, 0, 1, 0, 1])
-    print(data)
-    encoder.scrambler(data)
-    decode = unscrambler(data)
-    print(decode)
-    encoded_data = encoder.encoder(data)
-    print("Encoded Data:")
-    print(encoded_data)
-    
-    decoded_data = decoder(encoded_data)
-    print("Decoded Data:")
-    print(decoded_data)
-    print("Input Data:")
-    print(data)
+    _term = [1, 1, 1, 1, 1, 1, 0, 1]
+    _idle = [0, 0, 0, 0, 0, 1, 1, 1]
+    byte1 = np.array([0, 0, 0, 0, 0, 0, 0, 1] * 6 + 1 * _term + _idle * 1)
+    # byte2 = np.array(byte1)
+    # encoder.scrambler(byte2)
+    # dec = unscrambler(byte2)
+    en = encoder.encoder(byte1)
+    dec = decoder(en)
+    print(sum(dec != byte1))
+    print(byte1)
+    print(dec)
+    # res1, logic = encoder.XGMII_to_bit_field(byte1)
+    # res1 = np.append(np.array([1, 0]), res1)
+    # res2 = bit_field_to_XGMII(res1)
+    # print(sum(byte1 != res2))
+    # print(byte1)
+    # print(res2)
 
 if __name__ == "__main__":
     main()

@@ -22,13 +22,13 @@ def XGMII_terminate(data:np.ndarray) -> np.ndarray:
     
     # Put Bits here
     block = np.append(block, term)
-    while block.size <= 46:
+    while block.size < 64:
         block = np.append(block, idle)
     return block
 
 def framing(data:np.ndarray, dest:np.ndarray, src:np.ndarray) -> np.ndarray:
     # Error Handling
-    if (data.size < 46):
+    if (data.size < 64):
         data = XGMII_terminate(data)
     
     # Generate Frame's Bits

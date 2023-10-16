@@ -83,7 +83,7 @@ def encoder(package:np.ndarray) -> np.ndarray:
 
     for i in range(0, package.size, 64):
         block, isHeader = XGMII_to_bit_field(package[i:i+64])
-        # scrambler(block)
+        scrambler(block)
         if isHeader:
             header = np.array([0, 1])
         else:

@@ -70,5 +70,6 @@ def main():
     print(decoded_data)
     print("Input Data:")
     print(data)
+
 if __name__ == "__main__":
     main()

@@ -13,20 +13,35 @@ def data_length(data:np.ndarray) -> np.ndarray:
         size = size >> 1
     return length
 
+def XGMII_terminate(data:np.ndarray) -> np.ndarray:
+    block = np.array(data, dtype=np.int8)
+    
+    # Make TERM bits
+    term = np.zeros(8, dtype=np.int8)
+    utils.write_byte(term, utils.TERM, 0, 7)
+    
+    # Make IDLE bits
+    idle = np.zeros(8, dtype=np.int8)
+    utils.write_byte(idle, utils.IDLE, 0, 7)
+    
+    # Put Bits here
+    block = np.append(block, term)
+    while block.size <= 46:
+        block = np.append(block, idle)
+    return block
+
 def framing(data:np.ndarray, dest:np.ndarray, src:np.ndarray) -> np.ndarray:
-    # frame = np.array([])
+    # Error Handling
+    if (data.size < 46):
+        data = XGMII_terminate(data)
+    
+    # Generate Frame's Bits
     premable = np.array([1,0,1,0,1,0,1,0] * 7, dtype=np.int8)
     sfd = np.array([1,0,1,0,1,0,1,1], dtype=np.int8)
     length = data_length(data)
     frame = np.zeros(56 + 8 + 48 + 48 + 16 + data.size + 32, dtype=np.int8)
 
-    # frame = np.append(frame, premable)
-    # frame = np.append(frame, sfd)
-    # frame = np.append(frame, dest)
-    # frame = np.append(frame, src)
-    # frame = np.append(frame, length)
-    # frame = np.append(frame, data)
-
+    # Put bit here
     utils.copy_bits(frame, 0, 55, premable)
     utils.copy_bits(frame, 56, 63, sfd)
     utils.copy_bits(frame, 64, 111, dest)
@@ -34,15 +49,13 @@ def framing(data:np.ndarray, dest:np.ndarray, src:np.ndarray) -> np.ndarray:
     utils.copy_bits(frame, 160, 175, length)
     utils.copy_bits(frame, 175, 175 + data.size - 1, data)
     
+    # Calculate CRC
     crc = crc_gen(frame, 64, 175 + data.size - 1)
-    # print(crc.size)
-    # frame = np.append(frame, crc)
     utils.copy_bits(frame, 175 + data.size, 175 + data.size + 31, crc)
-
     return frame
 
 def main():
-    byte = np.array([0] * 255)
+    byte = np.array([0] * 30)
     print(framing(byte, np.array([1, 1] * 24), np.array([0, 1] * 24)))
     pass
 

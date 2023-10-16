@@ -34,14 +34,6 @@ def shift_left_bits(seed:np.ndarray, msg_bit:int) -> None:
         seed[i] = int(num & digit != 0)
         digit <<= 1
     seed[-1] = msg_bit
-        
-def dec(x, y):
-    def test(func):
-        def inner(*args, **kwargs):
-            print("HEE")
-            func(*args, **kwargs)
-        return inner
-    return test
 
 def main():
     raw = np.array([0] * 64)

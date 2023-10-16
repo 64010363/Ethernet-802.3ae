@@ -2,7 +2,7 @@ import numpy as np
 import math
 import utils
 
-def XGMII_terminate(block:np.ndarray) -> np.ndarray:
+def XGMII_to_bit_field(block:np.ndarray) -> np.ndarray:
     output = np.zeros(64, dtype=np.int8)
     
     def put_terminate(blk:np.ndarray, start_byte:int) -> None:

@@ -6,17 +6,6 @@ import utils
 from framing import framing
 from encoder import encoder
 
-def package_divider(raw_data:np.ndarray, divide:int) -> np.ndarray:
-    n = math.ceil(raw_data.size / divide)
-    dest = np.random.randint(0, 2, 48, dtype=np.int8)
-    src = np.random.randint(0, 2, 48, dtype=np.int8)
-    send_bits = np.array([], dtype=np.int8)
-
-    for i in range(0, n):
-        frame = framing(raw_data[divide * i: divide * (i + 1)], dest, src)
-        send_bits = np.append(send_bits, frame)
-    return send_bits
-
 def transmitter(raw_data:np.ndarray, divide:int) -> np.ndarray:
     n = math.ceil(raw_data.size / divide)
     dest = np.random.randint(0, 2, 48, dtype=np.int8)

@@ -71,7 +71,7 @@ def transmitter(raw_data:np.ndarray, dest:np.ndarray, src:np.ndarray, divide:int
     
     # plot_data(data)
     # plot_encode(code)
-    plot_signal(xt)
+    # plot_signal(xt)
     BER = err_bit / raw_data.size
     return rev, BER, recieve_pkg
 

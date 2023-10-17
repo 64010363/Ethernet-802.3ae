@@ -10,6 +10,43 @@ from modulation import ASK
 from correlator import demodulation
 import matplotlib.pyplot as plt
 
+def plot_data(data):
+    t = np.arange(0, data.size, 1/10)
+    sig = np.array([])
+    for bit in data:
+        if bit == 0:
+            sig = np.append(sig, np.array([0] * 10))
+        else:
+            sig = np.append(sig, np.array([1] * 10))
+    plt.plot(t[0:320], sig[0:320])
+    plt.xlabel("Time (x100 ps)")
+    plt.ylabel("Amplitude (V)")
+    plt.title("Data 32-bits")
+    plt.show()
+
+def plot_encode(code):
+    t = np.arange(0, code.size, 1/10)
+    sig = np.array([])
+    for bit in code:
+        if bit == 0:
+            sig = np.append(sig, np.array([0] * 10))
+        else:
+            sig = np.append(sig, np.array([1] * 10))
+    plt.plot(t[0:320], sig[0:320])
+    plt.xlabel("Time (x100 ps)")
+    plt.ylabel("Amplitude (V)")
+    plt.title("64/66B Encoded Data 32-bits")
+    plt.show()
+
+def plot_signal(signal):
+    t = np.arange(0, signal.size / (10 ** 6), 10 ** -6)
+    plt.plot(t[0:-1], signal)
+    plt.xlabel("Time (us)")
+    plt.ylabel("Amplitude (V)")
+    plt.title("Ethernet Signal")
+    plt.show()
+
+
 def transmitter(raw_data:np.ndarray, dest:np.ndarray, src:np.ndarray, divide:int, SNRdB:int) -> (np.ndarray, int, int):
     rev = np.array([], dtype=np.int8)
     recieve_pkg = 0
@@ -30,8 +67,11 @@ def transmitter(raw_data:np.ndarray, dest:np.ndarray, src:np.ndarray, divide:int
         data2, val = deframing(frame2)
         recieve_pkg += val
         err_bit = sum(data != data2[0:data.size])
-        rev = np.append(rev, data2)
+        rev = np.append(rev, data2[0:data.size])
     
+    # plot_data(data)
+    # plot_encode(code)
+    plot_signal(xt)
     BER = err_bit / raw_data.size
     return rev, BER, recieve_pkg
 
@@ -39,13 +79,13 @@ def BER_calculate(SNRdB:int) -> np.ndarray:
     np.random.seed(69)
     dest = np.random.randint(0, 2, 48, dtype=np.int8)
     src = np.random.randint(0, 2, 48, dtype=np.int8)
-    raw = np.random.randint(0, 2, 8 * 100, dtype=np.int8)
-    res, BER, recive = transmitter(raw, dest, src, 1280, SNRdB)
+    raw = np.random.randint(0, 2, 8 * 500, dtype=np.int8)
+    res, BER, recive = transmitter(raw, dest, src, 512, SNRdB)
     print("BER = ", BER)
     print("package recieve = ", recive)
 
 def main():
-    BER_calculate(-45)
+    BER_calculate(-50)
 
 if __name__ == "__main__":
     main()

@@ -26,8 +26,15 @@ def get_length(frame:np.ndarray) -> int:
 def deframing(frame:np.ndarray) -> (np.ndarray, int):
     val = check_CRC(frame)
     length = utils.read_byte(frame, 160, 175)
-    frame = remove_sync_header(frame)
-    frame = remove_dest_src_mac(frame)
+
+    # if length is not in range then
+    if length > 1500 or length < 46:
+        frame = frame[64:]
+        frame = frame[96:]
+        return frame[16:-32], val
+
+    frame = frame[64:]
+    frame = frame[96:]
     frame = frame[16:-32]
     return np.array(frame[0:length * 8]), val
 

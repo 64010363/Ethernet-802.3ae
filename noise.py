@@ -1,11 +1,15 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 #  Generate Gaussian noise
 
 def noise(xt, SNRdB):
-    sigma = math.sqrt(0.5 * E)
-    n_t = np.random.normal(0, sigma, np.size(xt))
-    return xt + n_t
+    A = 1
+    Tb = 0.1
+    Eb = A ** 2 * Tb
+    sigma = np.sqrt(0.5 * Eb * 10 ** (-SNRdB/10))
+    n_t = np.random.normal(0, sigma, xt.size)
+    return np.add(xt, n_t)
 
 def main():
     mu = 0

@@ -1,8 +1,10 @@
 import numpy as np
+import math
 #  Generate Gaussian noise
 
-def noise(xt, mu, sigma):
-    n_t = np.random.normal(mu, sigma, np.size(xt))
+def noise(xt, SNRdB):
+    sigma = math.sqrt(0.5 * E)
+    n_t = np.random.normal(0, sigma, np.size(xt))
     return xt + n_t
 
 def main():

@@ -33,7 +33,7 @@ def transmitter(raw_data:np.ndarray, divide:int) -> np.ndarray:
 
 
 def main():
-    raw = np.random.randint(0, 2, 48, dtype=np.int8)
+    raw = np.random.randint(0, 2, 192000, dtype=np.int8)
     res = transmitter(raw, 1280)
 
 if __name__ == "__main__":

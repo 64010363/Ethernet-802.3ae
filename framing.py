@@ -2,53 +2,37 @@ import numpy as np
 from crc import crc_gen
 import utils
 
-def data_length(data:np.ndarray) -> np.ndarray:
-    digit = 15
-    size = data.size
-    length = np.zeros(16, dtype=np.int8)
-    
-    while size != 0:
-        length[digit] = size & 1
-        digit -= 1
-        size = size >> 1
-    return length
-
-def XGMII_terminate(data:np.ndarray) -> np.ndarray:
-    block = np.array(data, dtype=np.int8)
-    
-    # Make Control bits
-    term = utils.create_bits(utils.TERM, 8)
-    idle = utils.create_bits(utils.IDLE, 8)
-    
-    # Put Bits here
-    block = np.append(block, term)
-    while block.size < 64:
-        block = np.append(block, idle)
-    return block
-
 def framing(data:np.ndarray, dest:np.ndarray, src:np.ndarray) -> np.ndarray:
     # Error Handling
-    if (data.size < 64):
-        data = XGMII_terminate(data)
+    size = data.size
+    if (size < 64 * 8):
+        data = np.append(data, np.zeros(64 * 8 - size))
     
     # Generate Frame's Bits
     premable = np.array([1,0,1,0,1,0,1,0] * 7, dtype=np.int8)
     sfd = np.array([1,0,1,0,1,0,1,1], dtype=np.int8)
-    length = data_length(data)
-    frame = np.zeros(56 + 8 + 48 + 48 + 16 + data.size + 32, dtype=np.int8)
+    length = utils.create_bits(size // 8, 16)
+    frame = np.array([], dtype=np.int8)
+    # frame = np.zeros(56 + 8 + 48 + 48 + 16 + data.size, dtype=np.int8)
 
     # Put bit here
-    utils.copy_bits(frame, 0, 55, premable)
-    utils.copy_bits(frame, 56, 63, sfd)
-    utils.copy_bits(frame, 64, 111, dest)
-    utils.copy_bits(frame, 112, 159, src)
-    utils.copy_bits(frame, 160, 175, length)
-    utils.copy_bits(frame, 175, 175 + data.size - 1, data)
+    frame = np.append(premable, sfd)
+    frame = np.append(frame, dest)
+    frame = np.append(frame, src)
+    frame = np.append(frame, length)
+    frame = np.append(frame, data)
+
+    # Put Bits here
+    # utils.copy_bits(frame, 0, 55, premable)
+    # utils.copy_bits(frame, 56, 63, sfd)
+    # utils.copy_bits(frame, 64, 111, dest)
+    # utils.copy_bits(frame, 112, 159, src)
+    # utils.copy_bits(frame, 160, 175, length)
+    # utils.copy_bits(frame, 175, 175 + data.size - 1, data)
     
     # Calculate CRC
-    crc = crc_gen(frame, 64, 175 + data.size - 1)
-    utils.copy_bits(frame, 175 + data.size, 175 + data.size + 31, crc)
-    return frame
+    crc = crc_gen(frame, 64, 176 + data.size - 1)
+    return np.append(frame, crc)
 
 def main():
     byte = np.array([0] * 30)

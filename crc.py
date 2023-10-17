@@ -4,7 +4,7 @@ import utils
 def crc_gen(pkg:np.ndarray, msb:int, lsb:int) -> np.ndarray:
     seed = np.ones(32, dtype=np.int8)
     
-    for i in reversed(range(msb, lsb)):
+    for i in reversed(range(msb, lsb+1)):
         # Save Bit before shifting
         x32:int = int(seed[31])
         x26:int = int(seed[26])

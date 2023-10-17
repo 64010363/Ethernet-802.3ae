@@ -1,38 +1,37 @@
 import numpy as np
 import utils
 import crc
-im
 
-def remove_first_64_bits(frame: np.ndarray) -> np.ndarray:
+def remove_sync_header(frame:np.ndarray) -> np.ndarray:
     if frame.size <= 64:
         raise ValueError("Input array size should be greater than 64 bits")
     
-    return frame[64:]
+    return np.copy(frame[64:])
 
-# def Check_CRC(Check)
-#     checksum1 = Check[-32:]
-#     checksum2 = crc.crc_gen(Check)
+def check_CRC(package:np.ndarray) -> int:
+    checksum1 = package[-32:]
+    checksum2 = crc.crc_gen(package, 64, package.size - 33)
+    val = sum(checksum1 != checksum2)
+    return int(val == 0)
     
-def remove_dest_src_length(frame: np.ndarray) -> np.ndarray:
-    if frame.size < 112:
+def remove_dest_src_mac(frame:np.ndarray) -> np.ndarray:
+    if frame.size <= 96:
         raise ValueError("Input array size should be at least 112 bits")
 
-    return frame[112:]
+    return np.copy(frame[96:])
+
+def get_length(frame:np.ndarray) -> int:
+    return utils.read_byte(frame, 160, 175)
+
+def deframing(frame:np.ndarray) -> (np.ndarray, int):
+    val = check_CRC(frame)
+    length = utils.read_byte(frame, 160, 175)
+    frame = remove_sync_header(frame)
+    frame = remove_dest_src_mac(frame)
+    frame = frame[16:-32]
+    return np.array(frame[0:length * 8]), val
 
 def main():
-    frame = np.array([1, 0, 1, 0, 1, 0, 1, 0] * 7)
-    frame2 = np.array([1, 0, 1, 0, 1, 0, 1, 1])
-    frame3 = np.random.randint(0, 2, 96)
-    
-    data = np.ones(64)
-    crc = np.zeros(32)
-    frame = np.append(frame, frame2)
-    frame = np.append(frame, frame3)
-    frame = np.append(frame, data)
-    frame = np.append(frame, crc)
-    print(frame, frame.size)
-    frame_without_first_64_bits = remove_first_64_bits(frame)
-    print(frame_without_first_64_bits, frame_without_first_64_bits.size)
     pass
 
 if __name__ == "__main__":

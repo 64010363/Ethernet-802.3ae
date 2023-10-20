@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def BER_graph():
-    SNRdB = np.arange(-120, 10, 10)
-    BER = np.array([0.2587890625, 0.2587890625, 0.259765625, 0.259765625, 0.255859375, 0.255859375, 0.24609375, 0.220703125, 0.08203125, 0, 0, 0, 0])
-    plt.semilogy(SNRdB[0:8], BER[0:8])
+    SNRdB = (31,32,33,34,35,36,37,38,39,40,41,42)
+    BER = np.array([0.03282, 0.03188, 0.03182,0.03030,0.02929,0.02777, 0.026515, 0.02525, 0.02525, 0.02277 ,0.02227,0.02129])
+    plt.semilogy(SNRdB, BER)
     plt.xlabel("SNR (dB)")
     plt.ylabel("BER")
     plt.title("BER (Eb/N0) Ethernet802.03ae")
@@ -31,3 +31,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

@@ -14,28 +14,13 @@ import matplotlib.pyplot as plt
 #         else:
 #             signal = np.append(signal, no_pulse)
 #     return signal
-# def ASK(package: np.ndarray, amplitude=1, frequency=1, sample_rate=100, duration=1):
-#     t = np.linspace(0, len(package) * duration, int(len(package) * sample_rate * duration))
-#     carrier = amplitude * np.sin(2 * np.pi * frequency * t)
-#     n = int(sample_rate * duration)
-#     modulated_signal = np.zeros_like(carrier)
-#     # plt.plot(carrier)
-#     # plt.show
-#     i = 0  
-#     while i < len(package):
-#         bit = package[i]
-#         if bit == 1:
-#             modulated_signal[i*n : (i+1)*n] = carrier[i*n : (i+1)*n]
-#         i += 1 
-#     return modulated_signal
-def ASK(package: np.ndarray, amplitude=1, frequency=5, sample_rate=100, duration=1):
+def ASK(package: np.ndarray, amplitude=1, frequency=1, sample_rate=100, duration=1):
     t = np.linspace(0, len(package) * duration, int(len(package) * sample_rate * duration))
     carrier = amplitude * np.sin(2 * np.pi * frequency * t)
     n = int(sample_rate * duration)
-    
     modulated_signal = np.zeros_like(carrier)
     # plt.plot(carrier)
-    # plt.show         
+    # plt.show
     i = 0  
     while i < len(package):
         bit = package[i]
@@ -43,7 +28,7 @@ def ASK(package: np.ndarray, amplitude=1, frequency=5, sample_rate=100, duration
             modulated_signal[i*n : (i+1)*n] = carrier[i*n : (i+1)*n]
         i += 1 
     return modulated_signal
-    
+
 def main():
     # bits = np.array([0,1,1,0,1,0,1,0] * 1)
     # xt = ASK(bits)
